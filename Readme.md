@@ -18,5 +18,5 @@ Why use this plugin:
   - /replay time - jumps to the wished time (eg. /replay time 1:30 to go to 1 minute and 30 seconds
 
 # API documentation: 
-  API examples can be found <a href="https://github.com/thepn/ReplayAPI">here</a>
+  API examples can be found <a href="https://github.com/thepn/ReplayAPI/blob/master/Example.java">here</a>
   or use youtube tutorials (in german) which can be found on <a href="http://www.sebpas.de/replayapi">http://www.sebpas.de/
