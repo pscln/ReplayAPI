@@ -10,13 +10,17 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import de.sebpas.replay.event.ReplayStartEvent;
 import de.sebpas.replay.npc.NPC;
 import de.sebpas.replay.util.PlayingPlayer;
 
 public class RePlayer {
+	private double lastTick;
 	private Map<Player, PlayingPlayer> players;
 	private List<String> tickList;
 	private double currentTick;
@@ -33,76 +37,142 @@ public class RePlayer {
 		@Override
 		public void run() {
 			if(isRunning){
-				for(String s : getCurrentStringList()){
-					if(s != null){
-						String name = s.split(";")[2];
-						String uuid = s.split(";")[1];
-						if(!isExisting(s.split(";")[2])){
-							double x = 0, y = 0, z = 0;
-							float yaw = 0, pitch = 0;
-							String[] temp = s.split(";")[3].replace("moved:", "").split(",");
-							x = Double.parseDouble(temp[0]);
-							y = Double.parseDouble(temp[1]);
-							z = Double.parseDouble(temp[2]);
-		
-							yaw = Float.parseFloat(temp[3]);
-							pitch = Float.parseFloat(temp[4]);
+//				if(currentTick - lastTick > 1 && lastTick % 1 == 0){
+					double ticks = Math.floor(currentTick - lastTick);
+					System.out.println("Last tick: " + lastTick + ", current: " + currentTick + ", ticks to run: " + ticks);
+					for(int j = 0; j < ticks; j++){
+						System.out.println("running: " + j  + " / " + ticks + " ticks!");
+						for(String s : getCurrentStringList((int) lastTick + j)){
+							if(s.split(";").length == 1)
+								break;
+							String name = s.split(";")[2];
+							String uuid = s.split(";")[1];
+							if(!isExisting(s.split(";")[2])){
+								double x = 0, y = 0, z = 0;
+								float yaw = 0, pitch = 0;
+								String[] temp = s.split(";")[3].replace("moved:", "").split(",");
+								try{
+								x = Double.parseDouble(temp[0]);
+								y = Double.parseDouble(temp[1]);
+								z = Double.parseDouble(temp[2]);
+			
+								yaw = Float.parseFloat(temp[3]);
+								pitch = Float.parseFloat(temp[4]);
+								}catch(Exception e){
+									x = 0;
+									y = 255;
+									z = 0;
+									yaw = 45;
+									pitch = 0;
+								}
+								NPC npc = new NPC(uuid, name, new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z, yaw, pitch), (Player) players.keySet().toArray()[0]);
+								npcs.add(npc);
+								npc.spawn();
+							}else if(s.split(";")[3].startsWith("moved:")){ /** movement */
+								double x = 0, y = 0, z = 0;
+								float yaw = 0, pitch = 0;
+								String[] temp = s.split(";")[3].replace("moved:", "").split(",");
+								x = Double.parseDouble(temp[0]);
+								y = Double.parseDouble(temp[1]);
+								z = Double.parseDouble(temp[2]);
+			
+								yaw = Float.parseFloat(temp[3]);
+								pitch = Float.parseFloat(temp[4]);
+			
+								if(currentTick % 2 != 0){
+									float yawR = (float) Math.toRadians(yaw);
+									x = -Math.sin(yawR);
+									z = Math.cos(yawR);						
+								}
+
+								double speed = 4.3D;
+
+								if(s.split(";").length == 4 && getNPCByName(name).isBlocking() || getNPCByName(name).isSneaking() || getNPCByName(name).isSprinting())
+									getNPCByName(name).resetMovement();
+
+								if(s.split(";").length == 5){
+									if(s.split(";")[4].equalsIgnoreCase("sprint"))
+										getNPCByName(name).sprint();
+									if(s.split(";")[4].equalsIgnoreCase("sneak")){
+										getNPCByName(name).sneak();
+										speed /= 3D;
+									}
+									if(s.split(";")[4].equalsIgnoreCase("block")){
+										getNPCByName(name).block();
+										speed /= 4D;
+									}
+								}
+
+								if(s.split(";").length == 6){
+									if(s.split(";")[4].equalsIgnoreCase("block"))
+										getNPCByName(name).block();
+								}
+
+								getNPCByName(name).look(yaw, pitch);
+								getNPCByName(name).move(x * (speed / 20), y - getNPCByName(name).getLocation().getY(), z * (speed / 20), yaw, pitch);
+
+								if(currentTick % 2 == 0)
+									getNPCByName(name).teleport(new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z, yaw, pitch));
+							}else if(s.split(";").length == 1)
+								break;
 							
-							NPC npc = new NPC(uuid, name, new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z, yaw, pitch), (Player) players.keySet().toArray()[0]);
-							npcs.add(npc);
-							npc.spawn();
-						}else if(s.split(";")[3].startsWith("moved:")){ /** movement */
-							double x = 0, y = 0, z = 0;
-							float yaw = 0, pitch = 0;
-							String[] temp = s.split(";")[3].replace("moved:", "").split(",");
-							x = Double.parseDouble(temp[0]);
-							y = Double.parseDouble(temp[1]);
-							z = Double.parseDouble(temp[2]);
-		
-							yaw = Float.parseFloat(temp[3]);
-							pitch = Float.parseFloat(temp[4]);
-		
-							if(currentTick % 2 != 0){
-								float yawR = (float) Math.toRadians(yaw);
-								x = -Math.sin(yawR);
-								z = Math.cos(yawR);						
-							}
-
-							double speed = 4.3D;
-
-							if(s.split(";").length == 4 && getNPCByName(name).isBlocking() || getNPCByName(name).isSneaking() || getNPCByName(name).isSprinting())
-								getNPCByName(name).reset();
-
-							if(s.split(";").length == 5){
-								if(s.split(";")[4].equalsIgnoreCase("sprint"))
-									getNPCByName(name).sprint();
-								if(s.split(";")[4].equalsIgnoreCase("sneak")){
-									getNPCByName(name).sneak();
-									speed /= 3D;
+							if(s.split(";")[3].startsWith("swing")) /** swinging the item in hand */ {
+								getNPCByName(name).swingArm();
+							}else if(s.split(";")[3].startsWith("dmg")) /** damage animation */ {
+								getNPCByName(name).damageAnimation();
+							}else if(s.split(";")[3].startsWith("armr")) /** armor content updating */ {
+								String[] temp = s.split(";")[3].replace("armr:", "").split(",");
+								ItemStack[] armor = new ItemStack[4]; 
+								for(int i = 0; i < temp.length; i++){
+									armor[i] = new ItemStack(Material.getMaterial(temp[i]));
 								}
-								if(s.split(";")[4].equalsIgnoreCase("block")){
-									getNPCByName(name).block();
-									speed /= 4D;
+								getNPCByName(name).updateItems(getNPCByName(name).getItemInHand(), armor[3], armor[2], armor[1], armor[0]);
+							}else if(s.split(";")[3].startsWith("itmhnd")) /** item in hand */ {
+									getNPCByName(name).updateItems(new ItemStack(Material.getMaterial(s.split(";")[3].replace("itmhnd:", ""))), getNPCByName(name).getArmorContents()[0], getNPCByName(name).getArmorContents()[1], getNPCByName(name).getArmorContents()[2], getNPCByName(name).getArmorContents()[3]);
+							}else if(s.split(";")[3].startsWith("lggdin")) /** joined the game */ {
+								double x = 0, y = 0, z = 0;
+								String[] temp = s.split(";")[3].replace("lggdin:", "").split(",");
+								try{
+									x = Double.parseDouble(temp[0]);
+									y = Double.parseDouble(temp[1]);
+									z = Double.parseDouble(temp[2]);
+								}catch(Exception e){
+									x = 0;
+									y = 255;
+									z = 0;
 								}
+
+								sendChatMessageToAll(s.split(";")[4]);
+								getNPCByName(name).spawn(new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z));
+							}else if(s.split(";")[3].startsWith("lggdout")) /** left the game */ {
+								sendChatMessageToAll(s.split(";")[4]);
+								getNPCByName(name).deSpawn();
+							}else if(s.split(";")[3].startsWith("died")) /** died */ {
+								sendChatMessageToAll(s.split(";")[4]);
+								getNPCByName(name).deSpawn();
+							}else if(s.split(";")[3].startsWith("rspn")) /** respawned */ {
+								double x = 0, y = 0, z = 0;
+								String[] temp = s.split(";")[3].replace("rspn:", "").split(",");
+								try{
+									x = Double.parseDouble(temp[0]);
+									y = Double.parseDouble(temp[1]);
+									z = Double.parseDouble(temp[2]);
+								}catch(Exception e){
+									x = 0;
+									y = 255;
+									z = 0;
+								}
+
+								sendChatMessageToAll(s.split(";")[4]);
+								getNPCByName(name).spawn(new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z));
+							}else if(s.split(";")[3].startsWith("cht")) /** chat message sent */ {
+								for(Player p : players.keySet())
+									p.sendMessage(ChatColor.translateAlternateColorCodes('&', s.split(";")[4]));
 							}
-
-							if(s.split(";").length == 6){
-								if(s.split(";")[4].equalsIgnoreCase("block"))
-									getNPCByName(name).block();
-							}
-
-							getNPCByName(name).look(yaw, pitch);
-							getNPCByName(name).move(x * (speed / 20), y - getNPCByName(name).getLocation().getY(), z * (speed / 20), yaw, pitch);
-
-							if(currentTick % 2 == 0)
-								getNPCByName(name).teleport(new Location(((Player) players.keySet().toArray()[0]).getWorld(), x, y, z, yaw, pitch));
-						}else if(s.split(";")[3].startsWith("swing")) /** swinging the item in hand */ {
-							getNPCByName(name).swingArm();
-						}else if(s.split(";")[3].startsWith("dmg")) /** damage animation */ {
-							getNPCByName(name).damageAnimation();
 						}
+						lastTick = Math.floor(currentTick);
 					}
-				}
+			
 				/** tick decrease */
 				currentTick += velocity;
 			}
@@ -147,6 +217,7 @@ public class RePlayer {
 	@SuppressWarnings("deprecation")
 	public void start(){
 		this.isRunning = true;
+		Bukkit.getPluginManager().callEvent(new ReplayStartEvent(this));
 		if(tickList == null){
 			for(Player p : this.players.keySet()){
 				p.sendMessage(ChatColor.translateAlternateColorCodes('&', ReplaySystem.getInstance().getErrorPrefix() + " &3Fehler beim lesen der Datei!"));	
@@ -214,9 +285,10 @@ public class RePlayer {
 		return currentTick;
 	}
 	public boolean setCurrentTick(double currentTick) {
-		if(currentTick >= this.getLastTick())
+		if(currentTick >= this.getLastTick() || currentTick < 0)
 			return false;
 		this.currentTick = currentTick;
+		this.lastTick = currentTick -= velocity;
 		return true;
 	}
 	public Map<Player, PlayingPlayer> getPlayers() {
@@ -234,10 +306,10 @@ public class RePlayer {
 		return max;
 	}
 	
-	private List<String> getCurrentStringList(){
+	private List<String> getCurrentStringList(int tick){
 		List<String> rtn = new ArrayList<String>();
 		for(String s : tickList){
-			if(Integer.parseInt(s.split(";")[0]) == currentTick)
+			if(Integer.parseInt(s.split(";")[0]) == tick)
 				rtn.add(s);
 		}
 		return rtn;
@@ -259,5 +331,9 @@ public class RePlayer {
 
 	public List<NPC> getNpcs() {
 		return npcs;
+	}
+	private void sendChatMessageToAll(String msg){
+		for(Player p : this.players.keySet())
+			p.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
 	}
 }

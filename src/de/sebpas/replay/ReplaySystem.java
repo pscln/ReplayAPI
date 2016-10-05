@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.sebpas.replay.command.CommandReplay;
+import de.sebpas.replay.event.ReplayStoppedEvent;
 import de.sebpas.replay.filesystem.FileManager;
 import de.sebpas.replay.util.PlayingPlayer;
-import de.sebpas.replay.util.ReplayStoppedEvent;
 
 public class ReplaySystem extends JavaPlugin{
 	private int ranTicks = 0;
@@ -63,13 +63,13 @@ public class ReplaySystem extends JavaPlugin{
 	
 	public void start(){
 		this.ranTicks = 0;
-		this.recorder.recorde();
 		this.fileSystem.reset();
+		this.recorder.recorde();
 	}
 	
 	public void stop(){
-		this.ranTicks = 0;
 		this.recorder.stop();
+		this.ranTicks = 0;
 		this.fileSystem.save();
 	}
 	

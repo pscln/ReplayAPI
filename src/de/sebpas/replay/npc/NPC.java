@@ -10,6 +10,7 @@ import net.minecraft.server.v1_8_R2.PacketPlayOutAnimation;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntity.PacketPlayOutEntityLook;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R2.PacketPlayOutEntityEquipment;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntityHeadRotation;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_8_R2.PacketPlayOutEntityTeleport;
@@ -20,8 +21,11 @@ import net.minecraft.server.v1_8_R2.WorldSettings.EnumGamemode;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R2.util.CraftChatMessage;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.mojang.authlib.GameProfile;
 
@@ -34,10 +38,17 @@ public class NPC extends Reflections{
 	private String name;
 	private Player player;
 	
+	/** movement */
 	private boolean isSneaking = false;
 	private boolean isSprinting = false;
 	private boolean isBlocking = false;
 	
+	/** items (armor, item in hand etc) */
+	private ItemStack helmet;
+	private ItemStack chestplate;
+	private ItemStack leggins;
+	private ItemStack boots;
+	private ItemStack handHeld;
 	
 	/**
 	 * @param name
@@ -56,7 +67,12 @@ public class NPC extends Reflections{
 		this.player = player;
 		this.name = name;
 	}
+	/** spawns this npc */
 	public void spawn(){
+		this.spawn(location);
+	}
+	/** spawns this npc at location location */
+	public void spawn(Location location){
 		PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
 		setValue(packet, "a", ID);
 		setValue(packet, "b", profile.getId());
@@ -80,6 +96,7 @@ public class NPC extends Reflections{
 			sendPacket(packet);
 	}
 	
+	/** tp to location loc */
 	public void teleport(Location loc) {
 	    PacketPlayOutEntityTeleport tp = new PacketPlayOutEntityTeleport();
 	    setValue(tp, "a", Integer.valueOf(this.ID));
@@ -95,6 +112,7 @@ public class NPC extends Reflections{
 			sendPacket(tp);
 	}
 	
+	/** let this npc sneak */
 	public void sneak(){
 		this.isSneaking = true;
 		this.isBlocking = false;
@@ -110,7 +128,8 @@ public class NPC extends Reflections{
 			sendPacket(packet);
 	}
 
-	public void reset(){
+	/** resets the sprinting, sneaking [...] values */
+	public void resetMovement(){
 		this.isBlocking = false;
 		this.isSneaking = false;
 		this.isSprinting = false;
@@ -125,6 +144,7 @@ public class NPC extends Reflections{
 			sendPacket(packet);
 	}
 
+	/** let this npc sprint */
 	public void sprint(){
 		this.isSprinting = true;
 		this.isBlocking = false;
@@ -140,6 +160,7 @@ public class NPC extends Reflections{
 			sendPacket(packet);
 	}
 
+	/** blocks with sword, bow or consumables */
 	public void block() {
 		this.isBlocking = true;
 		this.isSneaking = false;
@@ -155,17 +176,45 @@ public class NPC extends Reflections{
 			sendPacket(packet);
 	}
 
+	/** updates the inventory (esp. armor and item in hand) */
+	public void updateItems(ItemStack inHand, ItemStack boots, ItemStack leggins, ItemStack chestplate, ItemStack helmet){
+		if(inHand != null)
+			this.handHeld = inHand;
+		if(boots != null)
+			this.boots = boots;
+		if(leggins != null)
+			this.leggins = leggins;
+		if(chestplate != null)
+			this.chestplate = chestplate;
+		if(helmet != null)
+			this.helmet = helmet;
+		
+	    PacketPlayOutEntityEquipment[] packets = { new PacketPlayOutEntityEquipment(this.ID, 1, CraftItemStack.asNMSCopy(this.helmet)), new PacketPlayOutEntityEquipment(this.ID, 2, CraftItemStack.asNMSCopy(this.chestplate)), new PacketPlayOutEntityEquipment(this.ID, 3, CraftItemStack.asNMSCopy(this.leggins)), new PacketPlayOutEntityEquipment(this.ID, 4, CraftItemStack.asNMSCopy(this.boots)), new PacketPlayOutEntityEquipment(this.ID, 0, CraftItemStack.asNMSCopy(this.handHeld)) };
+
+	    for(int i = 0; i < packets.length; i++)
+		    if(player != null)
+				sendPacket(packets[i], player);
+			else
+				sendPacket(packets[i]);
+	}
 	
+	/** sends a damage animation to all players */
 	public void damageAnimation(){
 	    PacketPlayOutAnimation packet = new PacketPlayOutAnimation();
 	    setValue(packet, "a", (int) this.ID);
-	    setValue(packet, "b", (int) 2);
-	    if(player != null)
-			sendPacket(packet, player);
-		else
+	    setValue(packet, "b", (int) 1);
+	    if(player != null){
+	    	sendPacket(packet, player);
+	    	player.playSound(this.location, Sound.HURT_FLESH, 1, 2);
+	    }
+		else{
 			sendPacket(packet);
+			for(Player p : Bukkit.getOnlinePlayers())
+				p.playSound(this.location, Sound.HURT_FLESH, 1, 2);
+		}
 	}
 	
+	/** moves the npc with walking animation */
 	public void move(double x, double y, double z, float yaw, float pitch){
 		if(player != null)
 			sendPacket(new PacketPlayOutRelEntityMoveLook(this.ID, (byte) toFxdPnt(x), (byte) toFxdPnt(y), (byte) toFxdPnt(z), toAngle(yaw), toAngle(pitch), true), player);
@@ -184,6 +233,7 @@ public class NPC extends Reflections{
 		return this.location;
 	}
 	
+	/** changes players head rotation */
 	public void look(float yaw, float pitch){
 		PacketPlayOutEntityHeadRotation headRot = new PacketPlayOutEntityHeadRotation();
 		setValue(headRot, "a", this.ID);
@@ -205,6 +255,7 @@ public class NPC extends Reflections{
 		return (byte) ((int) (value * 256.0F / 360.0F));
 	}
 	
+	/** adds the npc to the target's tablist */
 	private void sendTablistPacket(){
 		PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
 		PacketPlayOutPlayerInfo.PlayerInfoData data = packet.new PlayerInfoData(profile, 1, EnumGamemode.NOT_SET, CraftChatMessage.fromString(profile.getName())[0]);
@@ -218,6 +269,7 @@ public class NPC extends Reflections{
 		else
 			sendPacket(packet);
 	}
+	/** removes the npc from the target's tablist */
 	private void removeFromTablist(){
 		boolean isOnline = false;
 		for(Player p : Bukkit.getOnlinePlayers()){
@@ -233,6 +285,7 @@ public class NPC extends Reflections{
 		else
 			sendPacket(packet);
 	}
+	/** kills this npc */
 	public void deSpawn(){
 		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(this.ID);
 		if(player != null)
@@ -242,7 +295,8 @@ public class NPC extends Reflections{
 		this.removeFromTablist();
 	}
 	
-	  public void swingArm(){
+	/** plays the item use animation (hit or place blocks...) */
+	public void swingArm(){
 	    PacketPlayOutAnimation packet18 = new PacketPlayOutAnimation();
 	    setValue(packet18, "a", Integer.valueOf(this.ID));
 	    setValue(packet18, "b", Integer.valueOf(0));
@@ -250,7 +304,7 @@ public class NPC extends Reflections{
 			sendPacket(packet18, player);
 		else
 			sendPacket(packet18);
-	  }
+	}
 	
 	public String getName(){
 		return this.name;
@@ -263,5 +317,11 @@ public class NPC extends Reflections{
 	}
 	public boolean isBlocking() {
 		return isBlocking;
+	}
+	public ItemStack getItemInHand(){
+		return this.handHeld;
+	}
+	public ItemStack[] getArmorContents(){
+		return new ItemStack[]{ helmet, chestplate, leggins, boots };
 	}
 }
