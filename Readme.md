@@ -6,7 +6,6 @@ Languages: english and german
 Why use this plugin: 
   - No network, sql or bungeecord needed
   - create own plugins or features using the api
-  - no performance will be lost: this plugin only needs 500 MB
   - open source :D
 
 # Ingame Commands
