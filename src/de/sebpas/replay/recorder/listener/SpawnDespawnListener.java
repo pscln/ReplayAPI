@@ -26,13 +26,15 @@ public class SpawnDespawnListener implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoinEvent(PlayerJoinEvent e){
-		this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e.getPlayer().getName() + ";lggdin;" + e.getJoinMessage().replace('ง', '&') + ";"
+		this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e
+                .getPlayer().getName() + ";lggdin;" + e.getJoinMessage().replace('ยง', '&') + ";"
 				+ e.getPlayer().getLocation().getX() + "," + e.getPlayer().getLocation().getY() + "," + e.getPlayer().getLocation().getZ()
 				+ "," + e.getPlayer().getLocation().getYaw() + "," + e.getPlayer().getLocation().getPitch());
 	}
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onLeaveEvent(PlayerQuitEvent e){
-		this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e.getPlayer().getName() + ";lggdout;" + e.getQuitMessage().replace('ง', '&'));
+		this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e
+                .getPlayer().getName() + ";lggdout;" + e.getQuitMessage().replace('ยง', '&'));
 	}
 	
 	/**
@@ -42,7 +44,8 @@ public class SpawnDespawnListener implements Listener{
 	public void onDieEvent(PlayerDeathEvent e){
 		if(e.getEntityType() == EntityType.PLAYER){
 			Player p = (Player) e.getEntity();
-			this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + p.getUniqueId() + ";" + p.getName() + ";died;" + e.getDeathMessage().replace('ง', '&'));
+			this.plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + p.getUniqueId() + ";" + p.getName()
+                    + ";died;" + e.getDeathMessage().replace('ยง', '&'));
 		}
 	}
 	

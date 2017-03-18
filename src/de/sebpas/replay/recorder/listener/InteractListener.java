@@ -1,8 +1,9 @@
 package de.sebpas.replay.recorder.listener;
 
-import net.minecraft.server.v1_8_R2.ItemArmor;
-
-import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
+import de.sebpas.replay.ReplaySystem;
+import de.sebpas.replay.util.InventoryUtilities;
+import net.minecraft.server.v1_8_R3.ItemArmor;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,9 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
-
-import de.sebpas.replay.ReplaySystem;
-import de.sebpas.replay.util.InventoryUtilities;
 
 public class InteractListener implements Listener{
 	private ReplaySystem plugin;
@@ -58,6 +56,7 @@ public class InteractListener implements Listener{
 	}
 	@EventHandler
 	public void onChatMsg(AsyncPlayerChatEvent e){
-		plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e.getPlayer().getName() + ";cht;" + e.getMessage().replace('ง', '&'));
+		plugin.getRecorder().addString(plugin.getHandledTicks() + ";" + e.getPlayer().getUniqueId() + ";" + e
+                .getPlayer().getName() + ";cht;" + e.getMessage().replace('ยง', '&'));
 	}
 }

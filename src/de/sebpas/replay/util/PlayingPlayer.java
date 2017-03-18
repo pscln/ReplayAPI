@@ -66,11 +66,12 @@ public class PlayingPlayer implements Listener{
 	}
 	private void addItems(Player p){
 		p.getInventory().clear();
-		p.getInventory().setItem(8, ItemUtilities.createItem(Material.NETHER_STAR, 1, 0, "§3Geschwindigkeit §7(1.0x)"));
-		p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 5, "§cPausieren"));
-		p.getInventory().setItem(0, ItemUtilities.createItem(Material.COMPASS, 1, 0, "§3Tracker"));
-		p.getInventory().setItem(6, ItemUtilities.createItem(1, "MHF_ArrowRight", "§a30 Sekunden §7Vorspulen"));
-		p.getInventory().setItem(2, ItemUtilities.createItem(1, "MHF_ArrowLeft", "§c30 Sekunden §7Zurückspulen"));
+		p.getInventory().setItem(8, ItemUtilities.createItem(Material.NETHER_STAR, 1, 0, "Â§3Geschwindigkeit Â§7" +
+                "(1.0x)"));
+		p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 5, "Â§cPausieren"));
+		p.getInventory().setItem(0, ItemUtilities.createItem(Material.COMPASS, 1, 0, "Â§3Tracker"));
+		p.getInventory().setItem(6, ItemUtilities.createItem(1, "MHF_ArrowRight", "Â§a30 Sekunden Â§7Vorspulen"));
+		p.getInventory().setItem(2, ItemUtilities.createItem(1, "MHF_ArrowLeft", "Â§c30 Sekunden Â§7ZurÃ¼ckspulen"));
 	}
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onItemUse(PlayerInteractEvent e){
@@ -94,7 +95,7 @@ public class PlayingPlayer implements Listener{
 			}
 			r.setCurrentTick(r.getCurrentTick() + 20 * 30);
 		}
-		if(item.getItemMeta().getDisplayName().contains("Zurückspulen")){
+		if(item.getItemMeta().getDisplayName().contains("ZurÃ¼ckspulen")){
 			RePlayer r = ReplaySystem.getInstance().getPlayersRePlayer(p);
 			if(r == null){
 				p.sendMessage(ChatColor.translateAlternateColorCodes('&', ReplaySystem.getInstance().getErrorPrefix() + "Du befindest nicht in einem Replay!"));
@@ -109,7 +110,7 @@ public class PlayingPlayer implements Listener{
 				return;
 			}
 			r.pause();
-			p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 14, "§aFortsetzen"));
+			p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 14, "Â§aFortsetzen"));
 		}
 		if(item.getItemMeta().getDisplayName().contains("Fortsetzen")){
 			RePlayer r = ReplaySystem.getInstance().getPlayersRePlayer(p);
@@ -118,7 +119,7 @@ public class PlayingPlayer implements Listener{
 				return;
 			}
 			r.continueReplay();
-			p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 5, "§cPausieren"));
+			p.getInventory().setItem(4, ItemUtilities.createItem(Material.WOOL, 1, (short) 5, "Â§cPausieren"));
 		}
 		if(item.getItemMeta().getDisplayName().contains("Geschwindigkeit")){
 			RePlayer r = ReplaySystem.getInstance().getPlayersRePlayer(p);
@@ -145,7 +146,8 @@ public class PlayingPlayer implements Listener{
 			r.setVelocity(velocity);
 			if(velocity % 1 == 0)
 				r.setCurrentTick(Math.floor(r.getCurrentTick()));
-			p.getInventory().setItem(8, ItemUtilities.createItem(Material.NETHER_STAR, 1, 0, "§3Geschwindigkeit §7(" + velocity + "x)"));
+			p.getInventory().setItem(8, ItemUtilities.createItem(Material.NETHER_STAR, 1, 0, "Â§3Geschwindigkeit " +
+                    "Â§7(" + velocity + "x)"));
 		}
 	}
 	@EventHandler(priority = EventPriority.HIGHEST)

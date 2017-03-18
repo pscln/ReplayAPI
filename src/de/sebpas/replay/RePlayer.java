@@ -1,23 +1,17 @@
 package de.sebpas.replay;
 
+import de.sebpas.replay.event.ReplayStartEvent;
+import de.sebpas.replay.npc.NPC;
+import de.sebpas.replay.util.PlayingPlayer;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import de.sebpas.replay.event.ReplayStartEvent;
-import de.sebpas.replay.npc.NPC;
-import de.sebpas.replay.util.PlayingPlayer;
 
 public class RePlayer {
 	private double lastTick;
@@ -201,7 +195,7 @@ public class RePlayer {
 		this.currentTick = 0;
 		this.players = new HashMap<Player, PlayingPlayer>();
 		this.players.put(player, new PlayingPlayer(player));
-		tickList = ReplaySystem.getInstance().getFileManager().readFile(file + ".rpl");
+		tickList = ReplaySystem.getInstance().getFileManager().readFile(file);
 		if(!tickList.isEmpty())
 			ReplaySystem.getInstance().addPlayer(this);
 	}
@@ -209,7 +203,7 @@ public class RePlayer {
 	public RePlayer(String file, Map<Player, PlayingPlayer> players){
 		this.currentTick = 0;
 		this.players = players;
-		tickList = ReplaySystem.getInstance().getFileManager().readFile(file + ".rpl");
+		tickList = ReplaySystem.getInstance().getFileManager().readFile(file);
 		if(!tickList.isEmpty())
 			ReplaySystem.getInstance().addPlayer(this);
 	}
