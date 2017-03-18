@@ -1,15 +1,14 @@
 package de.sebpas.replay.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import de.sebpas.replay.ReplaySystem;
+import de.sebpas.replay.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import de.sebpas.replay.ReplaySystem;
-import de.sebpas.replay.npc.NPC;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InventoryUtilities {
 	private static Map<Player, ItemStack[]> armors = new HashMap<Player, ItemStack[]>();
@@ -21,10 +20,10 @@ public class InventoryUtilities {
 		if(npcs % 9 != 0)
 			while(npcs % 9 != 0)
 				++ npcs;
-		Inventory e = Bukkit.createInventory(p, npcs, "§cTracker");
+		Inventory e = Bukkit.createInventory(p, npcs, "Â§cTracker");
 		int slot = 0;
 		for(NPC n : ReplaySystem.getInstance().getPlayersRePlayer(p).getNpcs()){
-			e.setItem(slot, ItemUtilities.createItem(1, n.getName(), "§3" + n.getName()));
+			e.setItem(slot, ItemUtilities.createItem(1, n.getName(), "Â§3" + n.getName()));
 			++ slot;
 		}
 		p.openInventory(e);

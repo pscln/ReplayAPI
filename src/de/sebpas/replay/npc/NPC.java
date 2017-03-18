@@ -1,35 +1,19 @@
 package de.sebpas.replay.npc;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import net.minecraft.server.v1_8_R2.DataWatcher;
-import net.minecraft.server.v1_8_R2.MathHelper;
-import net.minecraft.server.v1_8_R2.PacketPlayOutAnimation;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntity.PacketPlayOutEntityLook;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntityEquipment;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntityHeadRotation;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_8_R2.PacketPlayOutEntityTeleport;
-import net.minecraft.server.v1_8_R2.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_8_R2.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R2.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
-import net.minecraft.server.v1_8_R2.WorldSettings.EnumGamemode;
-
+import com.mojang.authlib.GameProfile;
+import de.sebpas.replay.util.Reflections;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_8_R2.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.mojang.authlib.GameProfile;
-
-import de.sebpas.replay.util.Reflections;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class NPC extends Reflections{
 	private int ID;
@@ -217,9 +201,9 @@ public class NPC extends Reflections{
 	/** moves the npc with walking animation */
 	public void move(double x, double y, double z, float yaw, float pitch){
 		if(player != null)
-			sendPacket(new PacketPlayOutRelEntityMoveLook(this.ID, (byte) toFxdPnt(x), (byte) toFxdPnt(y), (byte) toFxdPnt(z), toAngle(yaw), toAngle(pitch), true), player);
+			sendPacket(new PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook(this.ID, (byte) toFxdPnt(x), (byte) toFxdPnt(y), (byte) toFxdPnt(z), toAngle(yaw), toAngle(pitch), true), player);
 		else
-			sendPacket(new PacketPlayOutRelEntityMoveLook(this.ID, (byte) toFxdPnt(x), (byte) toFxdPnt(y), (byte) toFxdPnt(z), toAngle(yaw), toAngle(pitch), true));
+			sendPacket(new PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook(this.ID, (byte) toFxdPnt(x), (byte) toFxdPnt(y), (byte) toFxdPnt(z), toAngle(yaw), toAngle(pitch), true));
 		this.location.add(toFxdPnt(x) / 32D, toFxdPnt(y) / 32D, toFxdPnt(z) / 32D);
 		this.location.setYaw(yaw);
 		this.location.setPitch(pitch);
@@ -241,11 +225,11 @@ public class NPC extends Reflections{
 		
 		if(player != null){
 			sendPacket(headRot);
-			sendPacket(new PacketPlayOutEntityLook(this.ID, toAngle(yaw), toAngle(pitch), true), player);
+			sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(this.ID, toAngle(yaw), toAngle(pitch), true), player);
 		}
 		else{
 			sendPacket(headRot);
-			sendPacket(new PacketPlayOutEntityLook(this.ID, toAngle(yaw), toAngle(pitch), true), player);
+			sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(this.ID, toAngle(yaw), toAngle(pitch), true), player);
 		}
 		this.location.setYaw(yaw);
 		this.location.setPitch(pitch);
@@ -258,7 +242,7 @@ public class NPC extends Reflections{
 	/** adds the npc to the target's tablist */
 	private void sendTablistPacket(){
 		PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-		PacketPlayOutPlayerInfo.PlayerInfoData data = packet.new PlayerInfoData(profile, 1, EnumGamemode.NOT_SET, CraftChatMessage.fromString(profile.getName())[0]);
+		PacketPlayOutPlayerInfo.PlayerInfoData data = packet.new PlayerInfoData(profile, 1, WorldSettings.EnumGamemode.NOT_SET, CraftChatMessage.fromString(profile.getName())[0]);
 		@SuppressWarnings("unchecked")
 		List<PacketPlayOutPlayerInfo.PlayerInfoData> players = (List<PacketPlayOutPlayerInfo.PlayerInfoData>) getValue(packet, "b");
 		players.add(data);
@@ -278,7 +262,7 @@ public class NPC extends Reflections{
 		}
 		if(isOnline)
 			return;
-		PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER);
+		PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
 		setValue(packet, "b", Arrays.asList(packet.new PlayerInfoData(this.profile, 0, null, null)));
 		if(player != null)
 			sendPacket(packet, player);

@@ -32,7 +32,8 @@ public class CommandReplay implements CommandExecutor{
 		}
 		if(cmd.getName().equalsIgnoreCase("replay")){
 			if(!(sender instanceof Player)){
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getErrorPrefix() + "Nur für Spieler geeignet!"));
+				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getErrorPrefix() + "Nur fÃ¼r " +
+                        "Spieler geeignet!"));
 				return true;
 			}
 			if(args.length != 1 && args.length != 2){
