@@ -1,6 +1,9 @@
 # ReplayAPI - Development paused :( I am sorry
 ReplayAPI a plugin for Bukkit / Spigot to record and replay ingame action
 
+IMPORTANT: Here is a newer version of this project - still not continued but way better than this one:
+https://bitbucket.org/thepn/replayapi/src/master/src/de/sebpas/replay/filesystem/serializable/
+
 Languages: english and german
 
 Why use this plugin: 
