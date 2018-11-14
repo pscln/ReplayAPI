@@ -1,4 +1,4 @@
-# ReplayAPI
+# ReplayAPI - Development paused :( I am sorry
 ReplayAPI a plugin for Bukkit / Spigot to record and replay ingame action
 
 Languages: english and german
