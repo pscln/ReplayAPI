@@ -18,4 +18,3 @@ Why use this plugin:
 
 # API documentation: 
   API examples can be found <a href="https://github.com/thepn/ReplayAPI/blob/master/Example.java">here</a>
-  or use youtube tutorials (in german) which can be found on <a href="http://www.sebpas.de/replayapi">http://www.sebpas.de/
